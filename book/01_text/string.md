@@ -220,5 +220,60 @@ print("SUBSTITUTED:", t.safe_substitute(var="replacement"))
 
 ## 格式化类(Formatter)
 
+`Formatter` 类可以实现与`str`的`format()`方法相同的格式化布局。其功能包括类型转换，对齐，属性和
+字段引用，命名和位置模板参数以及类型特定的格式化选项。多数情况下，`format()` 方法是这些特性更为方便
+的接口，但`Formatter`可以用来很方便的构建子类，适用于一些灵活变化的情况。
 
 
+
+## 常量
+
+`string` 模块包含许多与 ASCII 和数字符号相关的常量集。
+
+```python
+# string_constants.py
+
+import string
+import inspect
+
+
+def is_str(value):
+    return isinstance(value, str)
+
+
+for name, value in inspect.getmembers(string, is_str):
+    if name.startswith('_'):
+        continue
+    print('{}={!r}\n'.format(name, value))
+```
+
+当使用 ASCII 时，这些常量是有用的，但因为Unicode的使用越来越普遍，所以它的应用也受到了限制。
+
+
+    python3 string_constants.py
+
+    ascii_letters='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+    ascii_lowercase='abcdefghijklmnopqrstuvwxyz'
+
+    ascii_uppercase='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+    digits='0123456789'
+
+    hexdigits='0123456789abcdefABCDEF'
+
+    octdigits='01234567'
+
+    printable='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
+
+    punctuation='!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+
+    whitespace=' \t\n\r\x0b\x0c'
+
+
+> **扩展阅读**
+>
+> - [string 标准库文档](https://docs.python.org/3.5/library/string.html)
+> - [String Methods](https://docs.python.org/3/library/stdtypes.html#string-methods) - Methods of `str` objects that replace the deprecated functions in `string`
+> - [PEP 292](https://www.python.org/dev/peps/pep-0292) - 简单字符串替换
+> - [Format String Syntax](https://docs.python.org/3.5/library/string.html#format-string-syntax) – The formal definition of the layout specification language used by `Formatter` and `str.format()`.
