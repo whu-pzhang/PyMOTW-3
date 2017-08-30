@@ -60,7 +60,7 @@ regexes = [
 
 text = 'Does this text match the pattern?'
 
-print('Text: {!r}\n'.format((text)))
+print('Text: {!r}\n'.format(text))
 
 for regex in regexes:
     print("Seeking '{}' ->".format(regex.pattern))
@@ -133,3 +133,339 @@ for match in re.finditer(pattern, text):
 
 
 ## Pattern 语法
+
+正则表达式除了字符串匹配，还支持更为强大的模式匹配。
+Patterns can repeat, can be anchored to different logical locations within the input, and can be expressed in compact forms that do not require every literal character to be present in the pattern.
+
+所有这些特性
+
+``` python
+# re_test_pattern.py
+
+import re
+
+
+def test_patterns(text, patterns):
+    '''
+    Given source text and a list of patterns, look for
+    matches for each pattern within the text and print
+    them to stdout.
+    '''
+    # Look for each pattern in the text and print the results
+    for pattern, desc in patterns:
+        print("'{}' ({})\n".format(pattern, desc))
+        print("  '{}'".format(text))
+        for match in re.finditer(pattern, text):
+            s = match.start()
+            e = match.end()
+            substr = text[s:e]
+            n_backslashes = text[:s].count('\\')
+            prefix = '.' * (s + n_backslashes)
+            print("  {}'{}'".format(prefix, substr))
+
+        print()
+    return
+
+
+if __name__ == '__main__':
+    test_patterns('abbaaabbbbaaaaa',
+                  [('ab', "a followed by 'b'"),
+                   ])
+```
+
+例子中用`text_patterns()` 函数来声明patterns中的变量如何改变匹配输入字符串的方式。
+输出显示了输入文本和成功匹配的每个子字符串的范围。
+
+    $ python3 re_test_pattern.py
+    'ab' (a followed by 'b')
+
+    'abbaaabbbbaaaaa'
+    'ab'
+    .....'ab'
+
+## 重复(Repetition)
+
+在一个匹配模式中有五种方法来表示重复。
+
+| 元字符  |                                       含义                                       |
+| :-----: | -------------------------------------------------------------------------------- |
+|   `*`   | 匹配前一个字符0或无限次                                                          |
+|   `+`   | 匹配前一个字符1次或无限次                                                        |
+|   `?`   | 匹配前一个字符0次或1次                                                           |
+|  `{m}`  | 匹配前一个字符m次                                                                |
+| `{m,n}` | 匹配前一个字符m至n次。 m和n可以省略: 省略m表示匹配0到n次；省略n表示匹配m至无限次 |
+
+``` python
+# re_repetition.py
+
+from re_text_patterns import test_patterns
+
+test_patterns(
+    'abbaabbba',
+    [('ab*', 'a followed by zero or more b'),
+     ('ab+', 'a followed by one or more b'),
+     ('ab?', 'a followed by zero or one b'),
+     ('ab{3}', 'a followed by three b'),
+     ('ab{2,3}', 'a followed by two to three b')],
+)
+```
+
+匹配到 `ab*`和`ab?`的比 `ab+`多：
+
+    $ python3 re_repetition.py
+
+    'ab*' (a followed by zero or more b)
+
+      'abbaabbba'
+      'abb'
+      ...'a'
+      ....'abbb'
+      ........'a'
+
+    'ab+' (a followed by one or more b)
+
+      'abbaabbba'
+      'abb'
+      ....'abbb'
+
+    'ab?' (a followed by zero or one b)
+
+      'abbaabbba'
+      'ab'
+      ...'a'
+      ....'ab'
+      ........'a'
+
+    'ab{3}' (a followed by three b)
+
+      'abbaabbba'
+      ....'abbb'
+
+    'ab{2,3}' (a followed by two to three b)
+
+      'abbaabbba'
+      'abb'
+      ....'abbb'
+
+当处理一个重复的匹配模式时，`re` 总是尽可能的匹配到多的子字符串，称为贪婪模式。
+贪婪模式可能会导致更少的单独匹配以及与预期不相符的匹配过多。通过在正则表达式后面加上一个
+`?` 就可以切换到非贪婪模式。
+
+``` python
+# re_repetition_non_greedy.py
+
+from re_text_patterns import test_patterns
+
+test_patterns(
+    'abbaabbba',
+    [('ab*?', 'a followed by zero or more b'),
+     ('ab+?', 'a followed by one or more b'),
+     ('ab??', 'a followed by zero or one b'),
+     ('ab{3}?', 'a followed by three b'),
+     ('ab{2,3}?', 'a followed by two to three b')],
+)
+```
+
+非贪婪模式下，正则表达式便会尽可能的少匹配重复的字符。
+
+    $ python3 re_repetition_non_greedy.py
+
+    'ab*?' (a followed by zero or more b)
+
+      'abbaabbba'
+      'a'
+      ...'a'
+      ....'a'
+      ........'a'
+
+    'ab+?' (a followed by one or more b)
+
+      'abbaabbba'
+      'ab'
+      ....'ab'
+
+    'ab??' (a followed by zero or one b)
+
+      'abbaabbba'
+      'a'
+      ...'a'
+      ....'a'
+      ........'a'
+
+    'ab{3}?' (a followed by three b)
+
+      'abbaabbba'
+      ....'abbb'
+
+    'ab{2,3}?' (a followed by two to three b)
+
+      'abbaabbba'
+      'abb'
+      ....'abb'
+
+## 字符集
+
+字符集是指一组字符，匹配的可以是字符集中的任一字符。例如，`[ab]` 可以匹配`a`或者`b`。
+
+``` python
+# re_charset.py
+from re_test_patterns import test_patterns
+
+test_patterns(
+    'abbaabbba',
+    [('[ab]', 'either a or b'),
+     ('a[ab]+', 'a followed by 1 or more a or b'),
+     ('a[ab]+?', 'a followed by 1 or more a or b, not greedy')],
+)
+```
+
+`a[ab]+` 匹配到了整个字符串，在贪婪模式下，字符`a`后都是`a`或者`b`。
+
+    $ python3 re_charset.py
+
+    '[ab]' (either a or b)
+
+      'abbaabbba'
+      'a'
+      .'b'
+          ..'b'
+      ...'a'
+      ....'a'
+      .....'b'
+      ......'b'
+      .......'b'
+      ........'a'
+
+    'a[ab]+' (a followed by 1 or more a or b)
+
+      'abbaabbba'
+      'abbaabbba'
+
+    'a[ab]+?' (a followed by 1 or more a or b, not greedy)
+
+      'abbaabbba'
+      'ab'
+      ...'aa'
+
+一个字符集也可以用来排除特定的字符，`^` 表示匹配字符集中以外的字符。
+
+``` python
+# re_charset_exclude.py
+from re_test_patterns import test_patterns
+
+test_patterns(
+    'This is some text -- with punctuation.',
+    [('[^-. ]+', 'sequences without -, ., or space')],
+)
+```
+
+这个正则表达式pattern匹配了所有除了`-`， `.`和空格以外的字符。
+
+
+    $ python3 re_charset_exclude.py
+
+    '[^-. ]+' (sequences without -, ., or space)
+
+      'This is some text -- with punctuation.'
+      'This'
+      .....'is'
+      ........'some'
+      .............'text'
+      .....................'with'
+      ..........................'punctuation'
+
+如果需要匹配的字符集数目较多，每个都打出来费时费力。更为紧凑的字符集格式是利用`-`链接开始字符和结束字符，表示范围内的所有字符。
+
+``` python
+# re_charset_ranges.py
+from re_test_patterns import test_patterns
+
+test_patterns(
+    'This is some text -- with punctuation.',
+    [('[a-z]+', 'sequences of lowercase letters'),
+     ('[A-Z]+', 'sequences of uppercase letters'),
+     ('[a-zA-Z]+', 'sequences of letters of either case'),
+     ('[A-Z][a-z]+', 'one uppercase followed by lowercase')],
+)
+```
+
+范围 `a-z` 包括小写的ASCII字符，`A-Z` 包括所有的大写 ASCII 字符。 两个范围也可以合并为
+一个字符集 `[a-zA-z]`.
+
+    $ python3 re_charset_ranges.py
+
+    '[a-z]+' (sequences of lowercase letters)
+
+      'This is some text -- with punctuation.'
+      .'his'
+      .....'is'
+      ........'some'
+      .............'text'
+      .....................'with'
+      ..........................'punctuation'
+
+    '[A-Z]+' (sequences of uppercase letters)
+
+      'This is some text -- with punctuation.'
+      'T'
+
+    '[a-zA-Z]+' (sequences of letters of either case)
+
+      'This is some text -- with punctuation.'
+      'This'
+      .....'is'
+      ........'some'
+      .............'text'
+      .....................'with'
+      ..........................'punctuation'
+
+    '[A-Z][a-z]+' (one uppercase followed by lowercase)
+
+      'This is some text -- with punctuation.'
+      'This'
+
+作为字符集的特殊情况，元字符 点: `.` 可以匹配任何单个字符。
+
+``` python
+# re_charset_dot.py
+from re_test_patterns import test_patterns
+
+test_patterns(
+    'abbaabbba',
+    [('a.', 'a followed by any one character'),
+     ('b.', 'b followed by any one character'),
+     ('a.*b', 'a followed by anything, ending in b'),
+     ('a.*?b', 'a followed by anything, ending in b')],
+)
+```
+将 `.` 与重复字符组合可以匹配很长的字符，除非用非贪婪模式。
+
+    $ python3 re_charset_dot.py
+
+    'a.' (a followed by any one character)
+
+      'abbaabbba'
+      'ab'
+      ...'aa'
+
+    'b.' (b followed by any one character)
+
+      'abbaabbba'
+      .'bb'
+      .....'bb'
+      .......'ba'
+
+    'a.*b' (a followed by anything, ending in b)
+
+      'abbaabbba'
+      'abbaabbb'
+
+    'a.*?b' (a followed by anything, ending in b)
+
+      'abbaabbba'
+      'ab'
+      ...'aab'
+
+## 转义字符
+
+

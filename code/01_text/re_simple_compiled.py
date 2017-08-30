@@ -10,7 +10,7 @@ regexes = [
 
 text = 'Does this text match the pattern?'
 
-print('Text: {!r}\n'.format((text)))
+print('Text: {!r}\n'.format(text))
 
 for regex in regexes:
     print("Seeking '{}' ->".format(regex.pattern))
