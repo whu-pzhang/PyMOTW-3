@@ -183,7 +183,7 @@ if __name__ == '__main__':
     'ab'
     .....'ab'
 
-## 重复(Repetition)
+### 重复(Repetition)
 
 在一个匹配模式中有五种方法来表示重复。
 
@@ -303,7 +303,7 @@ test_patterns(
       'abb'
       ....'abb'
 
-## 字符集
+### 字符集
 
 字符集是指一组字符，匹配的可以是字符集中的任一字符。例如，`[ab]` 可以匹配`a`或者`b`。
 
@@ -466,6 +466,285 @@ test_patterns(
       'ab'
       ...'aab'
 
-## 转义字符
+### 转义字符
 
+比字符集更为紧凑的表示形式是利用几个预定义好的转移字符来表示，`re` 中的转移字符如下：
+
+| Code  |           含义           |
+| :---: | ------------------------ |
+| `\d`  | 一个数字: `[0-9]`        |
+| `\D`  | 非数字: `[^\d]`          |
+| `\s`  | 空格: `[ \t\r\n\f\v]`    |
+| `\S`  | 非空格： `[^\s]`         |
+| `\w`  | 单词字符: `[A-Za-z0-9_]` |
+| `\W`  | 非单词: `[^\w]`          |
+
+
+**注意**
+
+转移字符以反斜线开始，但是Python中反斜线本身也需要转义，这就导致表达式难以阅读。
+解决方法是通过用`r`前缀创建原始字符串来消除这个问题并保持可读性。
+
+``` python
+# re_escape_codes.py
+from re_test_patterns import test_patterns
+
+test_patterns(
+    'A prime #1 example!',
+    [(r'\d+', 'sequence of digits'),
+     (r'\D+', 'sequence of non-digits'),
+     (r'\s+', 'sequence of whitespace'),
+     (r'\S+', 'sequence of non-whitespace'),
+     (r'\w+', 'alphanumeric characters'),
+     (r'\W+', 'non-alphanumeric')],
+)
+```
+
+例子中将转义字符和重复表达式结合在一起。
+
+    $ python3 re_escape_codes.py
+
+    '\d+' (sequence of digits)
+
+      'A prime #1 example!'
+      .........'1'
+
+    '\D+' (sequence of non-digits)
+
+      'A prime #1 example!'
+      'A prime #'
+      ..........' example!'
+
+    '\s+' (sequence of whitespace)
+
+      'A prime #1 example!'
+      .' '
+      .......' '
+      ..........' '
+
+    '\S+' (sequence of non-whitespace)
+
+      'A prime #1 example!'
+      'A'
+      ..'prime'
+      ........'#1'
+      ...........'example!'
+
+    '\w+' (alphanumeric characters)
+
+      'A prime #1 example!'
+      'A'
+      ..'prime'
+      .........'1'
+      ...........'example'
+
+    '\W+' (non-alphanumeric)
+
+      'A prime #1 example!'
+      .' '
+      .......' #'
+      ..........' '
+      ..................'!'
+
+为了匹配术语正则表达式一部分的字符，在搜索pattern中需要将字符转义。
+
+```python
+# re_escape_escapes.py
+from re_test_patterns import test_patterns
+
+test_patterns(
+    r'\d+ \D+ \s+',
+    [(r'\\.\+', 'escape code')],
+)
+
+```
+
+匹配pattern中转义了反斜线和`+`，因为这两个字符在正则表达式中属于元字符，具有特殊含义。
+
+    $ python3 re_escape_escapes.py
+
+    '\\.\+' (escape code)
+
+      '\d+ \D+ \s+'
+      '\d+'
+      .....'\D+'
+      ..........'\s+'
+
+### 锚定(Anchoring)
+
+为了描述匹配字符在输入字符串中的相对位置，需要一套锚定字符。`re` 中合法的锚定字符如下：
+
+| Code  |         含义         |
+| :---: | -------------------- |
+|  `^`  | 字符串或每一行的开头 |
+|  `$`  | 字符串或每一行的末尾 |
+| `\A`  | 仅匹配字符串开头     |
+| `\Z`  | 仅匹配字符串末尾     |
+| `\b`  | 匹配单词前或后的空白 |
+| `\B`  | `[^\b]`              |
+
+``` python
+# re_anchoring.py
+from re_test_patterns import test_patterns
+
+test_patterns(
+    'This is some text -- with punctuation.',
+    [(r'^\w+', 'word at start of string'),
+     (r'\A\w+', 'word at start of string'),
+     (r'\w+\S*$', 'word near end of string'),
+     (r'\w+\S*\Z', 'word near end of string'),
+     (r'\w*t\w*', 'word containing t'),
+     (r'\bt\w+', 't at start of word'),
+     (r'\w+t\b', 't at end of word'),
+     (r'\Bt\B', 't, not start or end of word')],
+)
+
+```
+
+匹配字符串开头和末尾的匹配模式不同的原因在于字符串末尾含有标点。`\w+$` 将不会成功匹配，
+因为 `.` 不是单词字符。
+
+    $ python3 re_anchoring.py
+
+    '^\w+' (word at start of string)
+
+      'This is some text -- with punctuation.'
+      'This'
+
+    '\A\w+' (word at start of string)
+
+      'This is some text -- with punctuation.'
+      'This'
+
+    '\w+\S*$' (word near end of string)
+
+      'This is some text -- with punctuation.'
+      ..........................'punctuation.'
+
+    '\w+\S*\Z' (word near end of string)
+
+      'This is some text -- with punctuation.'
+      ..........................'punctuation.'
+
+    '\w*t\w*' (word containing t)
+
+      'This is some text -- with punctuation.'
+      .............'text'
+      .....................'with'
+      ..........................'punctuation'
+
+    '\bt\w+' (t at start of word)
+
+      'This is some text -- with punctuation.'
+      .............'text'
+
+    '\w+t\b' (t at end of word)
+
+      'This is some text -- with punctuation.'
+      .............'text'
+
+    '\Bt\B' (t, not start or end of word)
+
+      'This is some text -- with punctuation.'
+      .......................'t'
+      ..............................'t'
+      .................................'t'
+
+## 限制搜索(Constrainong the search)
+
+在事先知道只需要搜索输入字符串一部分的情况下，正则表达式可以限制搜索范围。举个栗子，
+如果匹配必须在输入开头，那么用`mathc()`而不是`search()`会自动地锚定，而不用在表达式中
+加入某种锚定符号。
+
+``` python
+# re_match.py
+import re
+
+text = 'This is some text -- with punctuation.'
+pattern = 'is'
+
+print('Text   :', text)
+print('Pattern:', pattern)
+
+m = re.match(pattern, text)
+print('Match  :', m)
+s = re.search(pattern, text)
+print('Search :', s)
+```  
+
+由于需匹配的字符没有出现在字符串开头，`mathc()`没有匹配到。匹配字符在后面的字符串中出现了
+两次，`search()`将其匹配出来了。
+
+    $ python3 re_match.py
+
+    Text   : This is some text -- with punctuation.
+    Pattern: is
+    Match  : None
+    Search : <_sre.SRE_Match object; span=(2, 4), match='is'>
+
+`fullmathc()` 函数要求全部字符都匹配。
+
+``` python
+# re_fullmatch.py
+
+import re
+
+text = 'This is some text -- with punctuation.'
+pattern = 'is'
+
+print('Text       :', text)
+print('Pattern    :', pattern)
+
+m = re.search(pattern, text)
+print('Search     :', m)
+s = re.fullmatch(pattern, text)
+print('Full match :', s)
+```
+
+这里，`search()` 显示要匹配的字符确实出现在输入中，但是没有包含整个需匹配的字符，
+因此，`fullmatch()` 返回了`None`。
+
+    $ python3 re_fullmatch.py
+
+    Text       : This is some text -- with punctuation.
+    Pattern    : is
+    Search     : <_sre.SRE_Match object; span=(2, 4), match='is'>
+    Full match : None
+
+编译的正则表达式的`search()` 方法接受可选的起始和结束参数，以限制搜索匹配的范围。
+
+``` python
+# re_search_substring.py
+
+import re
+
+text = 'This is some text -- with punctuation.'
+pattern = re.compile(r'\b\w*is\w*\b')
+
+print('Text:', text)
+print()
+
+pos = 0
+while True:
+    match = pattern.search(text, pos)
+    if not match:
+        break
+    s = match.start()
+    e = match.end()
+    print('   {:>2d} : {:>2d} = "{}"'.format(s, e - 1, text[s:e]))
+    # Move forward in text for the next search
+    pos = e
+
+```
+
+上述例子实现了一个低效率的`iterall()` 方法。每次匹配成功后，该匹配的结束为止用于下一次匹配的起始位置。
+
+    $ python3 re_search_substring.py
+
+    Text: This is some text -- with punctuation.
+
+       0 :  3 = "This"
+       5 :  6 = "is"
+
+## 分组(Dissecting Matches with Groups)
 
