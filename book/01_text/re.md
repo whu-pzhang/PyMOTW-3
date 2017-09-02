@@ -650,10 +650,10 @@ test_patterns(
       ..............................'t'
       .................................'t'
 
-## 限制搜索(Constrainong the search)
+## 限制搜索(Constraining the search)
 
 在事先知道只需要搜索输入字符串一部分的情况下，正则表达式可以限制搜索范围。举个栗子，
-如果匹配必须在输入开头，那么用`mathc()`而不是`search()`会自动地锚定，而不用在表达式中
+如果匹配必须在输入开头，那么用`match()`而不是`search()`会自动地锚定，而不用在表达式中
 加入某种锚定符号。
 
 ``` python
@@ -682,7 +682,7 @@ print('Search :', s)
     Match  : None
     Search : <_sre.SRE_Match object; span=(2, 4), match='is'>
 
-`fullmathc()` 函数要求全部字符都匹配。
+`fullmatch()` 函数要求全部字符都匹配。
 
 ``` python
 # re_fullmatch.py
@@ -747,4 +747,251 @@ while True:
        5 :  6 = "is"
 
 ## 分组(Dissecting Matches with Groups)
+
+模式匹配是正则表达式提供的强大基础功能。模式分组将匹配分离扩展了这种能力。
+组通过在括号中包围模式来定义。
+
+``` python
+# re_groups.py
+
+from re_test_patterns import test_patterns
+
+test_patterns(
+    'abbaaabbbbaaaaa',
+    [('a(ab)', 'a followed by literal ab'),
+     ('a(a*b*)', 'a followed by 0-n a and 0-n b'),
+     ('a(ab)*', 'a followed by 0-n ab'),
+     ('a(ab)+', 'a followed by 1-n ab')],
+)
+```
+
+任何完整的正则表达式都可以转换为分组模式。
+所有重复修饰符都可以应用于整个组，这时需要整个组模式重复。
+
+    $ python3 re_groups.py
+
+    'a(ab)' (a followed by literal ab)
+
+      'abbaaabbbbaaaaa'
+      ....'aab'
+
+    'a(a*b*)' (a followed by 0-n a and 0-n b)
+
+      'abbaaabbbbaaaaa'
+      'abb'
+      ...'aaabbbb'
+      ..........'aaaaa'
+
+    'a(ab)*' (a followed by 0-n ab)
+
+      'abbaaabbbbaaaaa'
+      'a'
+      ...'a'
+      ....'aab'
+      ..........'a'
+      ...........'a'
+      ............'a'
+      .............'a'
+      ..............'a'
+
+    'a(ab)+' (a followed by 1-n ab)
+
+      'abbaaabbbbaaaaa'
+      ....'aab'
+
+
+要访问由模式中的各个组匹配的子串，需使用`Match`对象的`groups()`方法。
+
+``` python
+# re_groups_match.py
+
+import re
+
+text = 'This is some text -- with punctuation.'
+
+print(text)
+print()
+
+patterns = [
+    (r'^(\w+)', 'word at start of string'),
+    (r'(\w+)\S*$', 'word at end, with optional punctuation'),
+    (r'(\bt\w+)\W+(\w+)', 'word starting with t, another word'),
+    (r'(\w+t)\b', 'word ending with t'),
+]
+
+for pattern, desc in patterns:
+    regex = re.compile(pattern)
+    match = regex.search(text)
+    print("'{}' ({})\n".format(pattern, desc))
+    print('  ', match.groups())
+    print()
+```
+
+`Match.groups()`按照与该字符串匹配的表达式中的组的顺序返回一串字符串。
+
+    $ python3 re_groups_match.py
+
+    This is some text -- with punctuation.
+
+    '^(\w+)' (word at start of string)
+
+       ('This',)
+
+    '(\w+)\S*$' (word at end, with optional punctuation)
+
+       ('punctuation',)
+
+    '(\bt\w+)\W+(\w+)' (word starting with t, another word)
+
+       ('text', 'with')
+
+    '(\w+t)\b' (word ending with t)
+
+       ('text',)
+
+要求单个组的匹配，请使用 `group()`方法。 当分组用于匹配字符串的一部分时而不需要另一部分时，这很有用。
+
+``` python
+# re_groups_individual.py
+
+import re
+
+text = 'This is some text -- with punctuation.'
+
+print('Input text            :', text)
+
+# word starting with 't' then another word
+regex = re.compile(r'(\bt\w+)\W+(\w+)')
+print('Pattern               :', regex.pattern)
+
+match = regex.search(text)
+print('Entire match          :', match.group(0))
+print('Word starting with "t":', match.group(1))
+print('Word after "t" word   :', match.group(2))
+
+```
+
+分组0表示整个表达式匹配的字符串，子组按照它们的左括号出现在表达式中的顺序从1开始编号。
+
+    $ python3 re_groups_individual.py
+
+    Input text            : This is some text -- with punctuation.
+    Pattern               : (\bt\w+)\W+(\w+)
+    Entire match          : text -- with
+    Word starting with "t": text
+    Word after "t" word   : with
+
+
+Python 将基础的分组扩展为分组命名模式。
+使用名称引用分组可以更容易地随时修改匹配模式，而无需使用匹配结果修改代码。
+利用语法`(?P<name>pattern)`来设置分组的名称。
+
+``` python
+# re_groups_named.py
+
+import re
+
+text = 'This is some text -- with punctuation.'
+
+print(text)
+print()
+
+patterns = [
+    r'^(?P<first_word>\w+)',
+    r'(?P<last_word>\w+)\S*$',
+    r'(?P<t_word>\bt\w+)\W+(?P<other_word>\w+)',
+    r'(?P<ends_with_t>\w+t)\b',
+]
+
+for pattern in patterns:
+    regex = re.compile(pattern)
+    match = regex.search(text)
+    print("'{}'".format(pattern))
+    print('  ', match.groups())
+    print('  ', match.groupdict())
+    print()
+
+```
+
+使用`groupdict()`从匹配中检索字典以映射组名到匹配得到的子字符串。
+匹配结果也包含在由`groups()`返回的有序序列中。
+
+    $ python3 re_groups_named.py
+
+    This is some text -- with punctuation.
+
+    '^(?P<first_word>\w+)'
+       ('This',)
+       {'first_word': 'This'}
+
+    '(?P<last_word>\w+)\S*$'
+       ('punctuation',)
+       {'last_word': 'punctuation'}
+
+    '(?P<t_word>\bt\w+)\W+(?P<other_word>\w+)'
+       ('text', 'with')
+       {'t_word': 'text', 'other_word': 'with'}
+
+    '(?P<ends_with_t>\w+t)\b'
+       ('text',)
+       {'ends_with_t': 'text'}
+
+`test_patterns()` 函数的升级版本将会使接下来的例子更为明晰。
+这个版本中，我们将显示分组编号和命名的分组。
+
+``` python
+# re_test_patterns_groups
+
+import re
+
+
+def test_patterns(text, patterns):
+    '''
+    Given source text and a list of patterns, look for
+    matches for each pattern within the text and print
+    them to stdout.
+    '''
+
+    # Look for each pattern in the text and print the results
+    for pattern, desc in patterns:
+        print('{!r} ({})\n'.format(pattern, desc))
+        print('  {!r}'.format(text))
+        for match in re.finditer(pattern, text):
+            s = match.start()
+            e = match.end()
+            prefix = ' ' * (s)
+            print(
+                '  {}{!r}{} '.format(prefix,
+                                     text[s:e],
+                                     ' ' * (len(text) - e)),
+                end=' ',
+            )
+            print(match.groups())
+            if match.groupdict():
+                print('{}{}'.format(
+                    ' ' * (len(text) - s),
+                    match.groupdict()),
+                )
+        print()
+    return
+
+```
+
+由于组本身是一个完整的正则表达式，组也可以嵌套在其他组中以构建更复杂的表达式。
+
+``` python
+
+```
+
+
+## 搜索选项
+
+搜索选项用来改变正则表达式引擎除了正则表达式的方式。可以使用按位与符号来组合flags,，然后
+传递给`compile()` `search()` 和`match()`等其他函数来处理。
+
+### 大小写不敏感匹配
+
+### 多行输入
+
+### Unicode
 
