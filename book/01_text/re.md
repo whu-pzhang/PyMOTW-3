@@ -38,10 +38,12 @@ print('Found "{}"\nin "{}"\nfrom {} to {} ("{}")'.format(
 
 `start()` 和 `end()` 方法返回成功匹配的字符在输入字符串中的索引值。
 
-    $ python3 re_simple_match.py
-    Found "this"
-    in "Does this text match the pattern?"
-    from 5 to 9 ("this")
+```Bash
+$ python3 re_simple_match.py
+Found "this"
+in "Does this text match the pattern?"
+from 5 to 9 ("this")
+```
 
 ## 编译正则表达式(Compiling Expressions)
 
@@ -74,15 +76,15 @@ for regex in regexes:
 模块级功能维护编译正则式的缓存，但高速缓存的大小是有限的，此外使用编译的正则表达式可以避免直接与
 高速缓存查找相关联的开销。使用编译好的正则表达式的另外一个好处在于，在加载模块时，预编译所有
 正则表达式，编译工作将转移到应用程序开始时，而不是在程序可能响应用户操作的时刻发生。
+```
+$ python3 re_simple_cimpiled.py
+Text: 'Does this text match the pattern?'
 
-    $ python3 re_simple_cimpiled.py
-    Text: 'Does this text match the pattern?'
-
-    Seeking 'this' ->
-    match!
-    Seeking 'that' ->
-    no match
-
+Seeking 'this' ->
+match!
+Seeking 'that' ->
+no match
+```
 ## 多重匹配
 
 目前为止，我们用到的例子中都只是利用`search()`来匹配文本字符串中的单个实例。
@@ -137,8 +139,6 @@ for match in re.finditer(pattern, text):
 正则表达式除了字符串匹配，还支持更为强大的模式匹配。
 Patterns can repeat, can be anchored to different logical locations within the input, and can be expressed in compact forms that do not require every literal character to be present in the pattern.
 
-所有这些特性
-
 ``` python
 # re_test_pattern.py
 
@@ -173,26 +173,28 @@ if __name__ == '__main__':
                    ])
 ```
 
-例子中用`text_patterns()` 函数来声明patterns中的变量如何改变匹配输入字符串的方式。
+例子中用`text_patterns()` 函数来说明patterns中的变量改变匹配输入字符串的方式。
 输出显示了输入文本和成功匹配的每个子字符串的范围。
 
-    $ python3 re_test_pattern.py
-    'ab' (a followed by 'b')
+```bash
+$ python3 re_test_pattern.py
+'ab' (a followed by 'b')
 
-    'abbaaabbbbaaaaa'
-    'ab'
-    .....'ab'
+'abbaaabbbbaaaaa'
+'ab'
+.....'ab'
+```
 
 ### 重复(Repetition)
 
 在一个匹配模式中有五种方法来表示重复。
 
-| 元字符  |                                       含义                                       |
-| :-----: | -------------------------------------------------------------------------------- |
-|   `*`   | 匹配前一个字符0或无限次                                                          |
-|   `+`   | 匹配前一个字符1次或无限次                                                        |
-|   `?`   | 匹配前一个字符0次或1次                                                           |
-|  `{m}`  | 匹配前一个字符m次                                                                |
+|   元字符   | 含义                                       |
+| :-----: | :--------------------------------------- |
+|   `*`   | 匹配前一个字符0或无限次                             |
+|   `+`   | 匹配前一个字符1次或无限次                            |
+|   `?`   | 匹配前一个字符0次或1次                             |
+|  `{m}`  | 匹配前一个字符m次                                |
 | `{m,n}` | 匹配前一个字符m至n次。 m和n可以省略: 省略m表示匹配0到n次；省略n表示匹配m至无限次 |
 
 ``` python
@@ -211,43 +213,43 @@ test_patterns(
 ```
 
 匹配到 `ab*`和`ab?`的比 `ab+`多：
+```
+$ python3 re_repetition.py
 
-    $ python3 re_repetition.py
+'ab*' (a followed by zero or more b)
 
-    'ab*' (a followed by zero or more b)
+  'abbaabbba'
+  'abb'
+  ...'a'
+  ....'abbb'
+  ........'a'
 
-      'abbaabbba'
-      'abb'
-      ...'a'
-      ....'abbb'
-      ........'a'
+'ab+' (a followed by one or more b)
 
-    'ab+' (a followed by one or more b)
+  'abbaabbba'
+  'abb'
+  ....'abbb'
 
-      'abbaabbba'
-      'abb'
-      ....'abbb'
+'ab?' (a followed by zero or one b)
 
-    'ab?' (a followed by zero or one b)
+  'abbaabbba'
+  'ab'
+  ...'a'
+  ....'ab'
+  ........'a'
 
-      'abbaabbba'
-      'ab'
-      ...'a'
-      ....'ab'
-      ........'a'
+'ab{3}' (a followed by three b)
 
-    'ab{3}' (a followed by three b)
+  'abbaabbba'
+  ....'abbb'
 
-      'abbaabbba'
-      ....'abbb'
+'ab{2,3}' (a followed by two to three b)
 
-    'ab{2,3}' (a followed by two to three b)
-
-      'abbaabbba'
-      'abb'
-      ....'abbb'
-
-当处理一个重复的匹配模式时，`re` 总是尽可能的匹配到多的子字符串，称为贪婪模式。
+  'abbaabbba'
+  'abb'
+  ....'abbb'
+```
+当处理一个重复的匹配模式时，`re` 总是尽可能的匹配到多的子字符串，称为**贪婪模式**。
 贪婪模式可能会导致更少的单独匹配以及与预期不相符的匹配过多。通过在正则表达式后面加上一个
 `?` 就可以切换到非贪婪模式。
 
@@ -268,40 +270,42 @@ test_patterns(
 
 非贪婪模式下，正则表达式便会尽可能的少匹配重复的字符。
 
-    $ python3 re_repetition_non_greedy.py
+```
+$ python3 re_repetition_non_greedy.py
 
-    'ab*?' (a followed by zero or more b)
+'ab*?' (a followed by zero or more b)
 
-      'abbaabbba'
-      'a'
-      ...'a'
-      ....'a'
-      ........'a'
+  'abbaabbba'
+  'a'
+  ...'a'
+  ....'a'
+  ........'a'
 
-    'ab+?' (a followed by one or more b)
+'ab+?' (a followed by one or more b)
 
-      'abbaabbba'
-      'ab'
-      ....'ab'
+  'abbaabbba'
+  'ab'
+  ....'ab'
 
-    'ab??' (a followed by zero or one b)
+'ab??' (a followed by zero or one b)
 
-      'abbaabbba'
-      'a'
-      ...'a'
-      ....'a'
-      ........'a'
+  'abbaabbba'
+  'a'
+  ...'a'
+  ....'a'
+  ........'a'
 
-    'ab{3}?' (a followed by three b)
+'ab{3}?' (a followed by three b)
 
-      'abbaabbba'
-      ....'abbb'
+  'abbaabbba'
+  ....'abbb'
 
-    'ab{2,3}?' (a followed by two to three b)
+'ab{2,3}?' (a followed by two to three b)
 
-      'abbaabbba'
-      'abb'
-      ....'abb'
+  'abbaabbba'
+  'abb'
+  ....'abb'
+```
 
 ### 字符集
 
@@ -319,34 +323,34 @@ test_patterns(
 )
 ```
 
-`a[ab]+` 匹配到了整个字符串，在贪婪模式下，字符`a`后都是`a`或者`b`。
+`a[ab]+` 匹配到了整个字符串，在贪婪模式下，字符`a`后就只是`a`或者`b`。
+```
+$ python3 re_charset.py
 
-    $ python3 re_charset.py
+'[ab]' (either a or b)
 
-    '[ab]' (either a or b)
+  'abbaabbba'
+  'a'
+  .'b'
+      ..'b'
+  ...'a'
+  ....'a'
+  .....'b'
+  ......'b'
+  .......'b'
+  ........'a'
 
-      'abbaabbba'
-      'a'
-      .'b'
-          ..'b'
-      ...'a'
-      ....'a'
-      .....'b'
-      ......'b'
-      .......'b'
-      ........'a'
+'a[ab]+' (a followed by 1 or more a or b)
 
-    'a[ab]+' (a followed by 1 or more a or b)
+  'abbaabbba'
+  'abbaabbba'
 
-      'abbaabbba'
-      'abbaabbba'
+'a[ab]+?' (a followed by 1 or more a or b, not greedy)
 
-    'a[ab]+?' (a followed by 1 or more a or b, not greedy)
-
-      'abbaabbba'
-      'ab'
-      ...'aa'
-
+  'abbaabbba'
+  'ab'
+  ...'aa'
+```
 一个字符集也可以用来排除特定的字符，`^` 表示匹配字符集中以外的字符。
 
 ``` python
@@ -361,19 +365,19 @@ test_patterns(
 
 这个正则表达式pattern匹配了所有除了`-`， `.`和空格以外的字符。
 
+```
+$ python3 re_charset_exclude.py
 
-    $ python3 re_charset_exclude.py
+'[^-. ]+' (sequences without -, ., or space)
 
-    '[^-. ]+' (sequences without -, ., or space)
-
-      'This is some text -- with punctuation.'
-      'This'
-      .....'is'
-      ........'some'
-      .............'text'
-      .....................'with'
-      ..........................'punctuation'
-
+  'This is some text -- with punctuation.'
+  'This'
+  .....'is'
+  ........'some'
+  .............'text'
+  .....................'with'
+  ..........................'punctuation'
+```
 如果需要匹配的字符集数目较多，每个都打出来费时费力。更为紧凑的字符集格式是利用`-`链接开始字符和结束字符，表示范围内的所有字符。
 
 ``` python
@@ -391,39 +395,39 @@ test_patterns(
 
 范围 `a-z` 包括小写的ASCII字符，`A-Z` 包括所有的大写 ASCII 字符。 两个范围也可以合并为
 一个字符集 `[a-zA-z]`.
+```bash
+$ python3 re_charset_ranges.py
 
-    $ python3 re_charset_ranges.py
+'[a-z]+' (sequences of lowercase letters)
 
-    '[a-z]+' (sequences of lowercase letters)
+  'This is some text -- with punctuation.'
+  .'his'
+  .....'is'
+  ........'some'
+  .............'text'
+  .....................'with'
+  ..........................'punctuation'
 
-      'This is some text -- with punctuation.'
-      .'his'
-      .....'is'
-      ........'some'
-      .............'text'
-      .....................'with'
-      ..........................'punctuation'
+'[A-Z]+' (sequences of uppercase letters)
 
-    '[A-Z]+' (sequences of uppercase letters)
+  'This is some text -- with punctuation.'
+  'T'
 
-      'This is some text -- with punctuation.'
-      'T'
+'[a-zA-Z]+' (sequences of letters of either case)
 
-    '[a-zA-Z]+' (sequences of letters of either case)
+  'This is some text -- with punctuation.'
+  'This'
+  .....'is'
+  ........'some'
+  .............'text'
+  .....................'with'
+  ..........................'punctuation'
 
-      'This is some text -- with punctuation.'
-      'This'
-      .....'is'
-      ........'some'
-      .............'text'
-      .....................'with'
-      ..........................'punctuation'
+'[A-Z][a-z]+' (one uppercase followed by lowercase)
 
-    '[A-Z][a-z]+' (one uppercase followed by lowercase)
-
-      'This is some text -- with punctuation.'
-      'This'
-
+  'This is some text -- with punctuation.'
+  'This'
+```
 作为字符集的特殊情况，元字符 点: `.` 可以匹配任何单个字符。
 
 ``` python
@@ -439,45 +443,45 @@ test_patterns(
 )
 ```
 将 `.` 与重复字符组合可以匹配很长的字符，除非用非贪婪模式。
+```
+$ python3 re_charset_dot.py
 
-    $ python3 re_charset_dot.py
+'a.' (a followed by any one character)
 
-    'a.' (a followed by any one character)
+  'abbaabbba'
+  'ab'
+  ...'aa'
 
-      'abbaabbba'
-      'ab'
-      ...'aa'
+'b.' (b followed by any one character)
 
-    'b.' (b followed by any one character)
+  'abbaabbba'
+  .'bb'
+  .....'bb'
+  .......'ba'
 
-      'abbaabbba'
-      .'bb'
-      .....'bb'
-      .......'ba'
+'a.*b' (a followed by anything, ending in b)
 
-    'a.*b' (a followed by anything, ending in b)
+  'abbaabbba'
+  'abbaabbb'
 
-      'abbaabbba'
-      'abbaabbb'
+'a.*?b' (a followed by anything, ending in b)
 
-    'a.*?b' (a followed by anything, ending in b)
-
-      'abbaabbba'
-      'ab'
-      ...'aab'
-
+  'abbaabbba'
+  'ab'
+  ...'aab'
+```
 ### 转义字符
 
 比字符集更为紧凑的表示形式是利用几个预定义好的转移字符来表示，`re` 中的转移字符如下：
 
-| Code  |           含义           |
-| :---: | ------------------------ |
-| `\d`  | 一个数字: `[0-9]`        |
-| `\D`  | 非数字: `[^\d]`          |
-| `\s`  | 空格: `[ \t\r\n\f\v]`    |
-| `\S`  | 非空格： `[^\s]`         |
-| `\w`  | 单词字符: `[A-Za-z0-9_]` |
-| `\W`  | 非单词: `[^\w]`          |
+| Code | 含义                   |
+| :--: | -------------------- |
+| `\d` | 一个数字: `[0-9]`        |
+| `\D` | 非数字: `[^\d]`         |
+| `\s` | 空格: `[ \t\r\n\f\v]`  |
+| `\S` | 非空格： `[^\s]`         |
+| `\w` | 单词字符: `[A-Za-z0-9_]` |
+| `\W` | 非单词: `[^\w]`         |
 
 
 **注意**
@@ -501,51 +505,51 @@ test_patterns(
 ```
 
 例子中将转义字符和重复表达式结合在一起。
+```
+$ python3 re_escape_codes.py
 
-    $ python3 re_escape_codes.py
+'\d+' (sequence of digits)
 
-    '\d+' (sequence of digits)
+  'A prime #1 example!'
+  .........'1'
 
-      'A prime #1 example!'
-      .........'1'
+'\D+' (sequence of non-digits)
 
-    '\D+' (sequence of non-digits)
+  'A prime #1 example!'
+  'A prime #'
+  ..........' example!'
 
-      'A prime #1 example!'
-      'A prime #'
-      ..........' example!'
+'\s+' (sequence of whitespace)
 
-    '\s+' (sequence of whitespace)
+  'A prime #1 example!'
+  .' '
+  .......' '
+  ..........' '
 
-      'A prime #1 example!'
-      .' '
-      .......' '
-      ..........' '
+'\S+' (sequence of non-whitespace)
 
-    '\S+' (sequence of non-whitespace)
+  'A prime #1 example!'
+  'A'
+  ..'prime'
+  ........'#1'
+  ...........'example!'
 
-      'A prime #1 example!'
-      'A'
-      ..'prime'
-      ........'#1'
-      ...........'example!'
+'\w+' (alphanumeric characters)
 
-    '\w+' (alphanumeric characters)
+  'A prime #1 example!'
+  'A'
+  ..'prime'
+  .........'1'
+  ...........'example'
 
-      'A prime #1 example!'
-      'A'
-      ..'prime'
-      .........'1'
-      ...........'example'
+'\W+' (non-alphanumeric)
 
-    '\W+' (non-alphanumeric)
-
-      'A prime #1 example!'
-      .' '
-      .......' #'
-      ..........' '
-      ..................'!'
-
+  'A prime #1 example!'
+  .' '
+  .......' #'
+  ..........' '
+  ..................'!'
+```
 为了匹配术语正则表达式一部分的字符，在搜索pattern中需要将字符转义。
 
 ```python
@@ -560,28 +564,28 @@ test_patterns(
 ```
 
 匹配pattern中转义了反斜线和`+`，因为这两个字符在正则表达式中属于元字符，具有特殊含义。
+```
+$ python3 re_escape_escapes.py
 
-    $ python3 re_escape_escapes.py
+'\\.\+' (escape code)
 
-    '\\.\+' (escape code)
-
-      '\d+ \D+ \s+'
-      '\d+'
-      .....'\D+'
-      ..........'\s+'
-
+  '\d+ \D+ \s+'
+  '\d+'
+  .....'\D+'
+  ..........'\s+'
+```
 ### 锚定(Anchoring)
 
 为了描述匹配字符在输入字符串中的相对位置，需要一套锚定字符。`re` 中合法的锚定字符如下：
 
-| Code  |         含义         |
-| :---: | -------------------- |
-|  `^`  | 字符串或每一行的开头 |
-|  `$`  | 字符串或每一行的末尾 |
-| `\A`  | 仅匹配字符串开头     |
-| `\Z`  | 仅匹配字符串末尾     |
-| `\b`  | 匹配单词前或后的空白 |
-| `\B`  | `[^\b]`              |
+| Code | 含义         |
+| :--: | ---------- |
+| `^`  | 字符串或每一行的开头 |
+| `$`  | 字符串或每一行的末尾 |
+| `\A` | 仅匹配字符串开头   |
+| `\Z` | 仅匹配字符串末尾   |
+| `\b` | 匹配单词前或后的空白 |
+| `\B` | `[^\b]`    |
 
 ``` python
 # re_anchoring.py
@@ -603,58 +607,57 @@ test_patterns(
 
 匹配字符串开头和末尾的匹配模式不同的原因在于字符串末尾含有标点。`\w+$` 将不会成功匹配，
 因为 `.` 不是单词字符。
+```
+$ python3 re_anchoring.py
 
-    $ python3 re_anchoring.py
+'^\w+' (word at start of string)
 
-    '^\w+' (word at start of string)
+  'This is some text -- with punctuation.'
+  'This'
 
-      'This is some text -- with punctuation.'
-      'This'
+'\A\w+' (word at start of string)
 
-    '\A\w+' (word at start of string)
+  'This is some text -- with punctuation.'
+  'This'
 
-      'This is some text -- with punctuation.'
-      'This'
+'\w+\S*$' (word near end of string)
 
-    '\w+\S*$' (word near end of string)
+  'This is some text -- with punctuation.'
+  ..........................'punctuation.'
 
-      'This is some text -- with punctuation.'
-      ..........................'punctuation.'
+'\w+\S*\Z' (word near end of string)
 
-    '\w+\S*\Z' (word near end of string)
+  'This is some text -- with punctuation.'
+  ..........................'punctuation.'
 
-      'This is some text -- with punctuation.'
-      ..........................'punctuation.'
+'\w*t\w*' (word containing t)
 
-    '\w*t\w*' (word containing t)
+  'This is some text -- with punctuation.'
+  .............'text'
+  .....................'with'
+  ..........................'punctuation'
 
-      'This is some text -- with punctuation.'
-      .............'text'
-      .....................'with'
-      ..........................'punctuation'
+'\bt\w+' (t at start of word)
 
-    '\bt\w+' (t at start of word)
+  'This is some text -- with punctuation.'
+  .............'text'
 
-      'This is some text -- with punctuation.'
-      .............'text'
+'\w+t\b' (t at end of word)
 
-    '\w+t\b' (t at end of word)
+  'This is some text -- with punctuation.'
+  .............'text'
 
-      'This is some text -- with punctuation.'
-      .............'text'
+'\Bt\B' (t, not start or end of word)
 
-    '\Bt\B' (t, not start or end of word)
-
-      'This is some text -- with punctuation.'
-      .......................'t'
-      ..............................'t'
-      .................................'t'
-
+  'This is some text -- with punctuation.'
+  .......................'t'
+  ..............................'t'
+  .................................'t'
+```
 ## 限制搜索(Constraining the search)
 
 在事先知道只需要搜索输入字符串一部分的情况下，正则表达式可以限制搜索范围。举个栗子，
-如果匹配必须在输入开头，那么用`match()`而不是`search()`会自动地锚定，而不用在表达式中
-加入某种锚定符号。
+如果匹配必须在输入开头，那么用`match()`而不是`search()`会自动地锚定，而不用在表达式中加入某种锚定符号。
 
 ``` python
 # re_match.py
@@ -670,18 +673,17 @@ m = re.match(pattern, text)
 print('Match  :', m)
 s = re.search(pattern, text)
 print('Search :', s)
-```  
+```
 
-由于需匹配的字符没有出现在字符串开头，`mathc()`没有匹配到。匹配字符在后面的字符串中出现了
-两次，`search()`将其匹配出来了。
+由于需匹配的字符没有出现在字符串开头，`mathc()`没有匹配到。匹配字符在后面的字符串中出现了两次，`search()`将其匹配出来了。
+```
+$ python3 re_match.py
 
-    $ python3 re_match.py
-
-    Text   : This is some text -- with punctuation.
-    Pattern: is
-    Match  : None
-    Search : <_sre.SRE_Match object; span=(2, 4), match='is'>
-
+Text   : This is some text -- with punctuation.
+Pattern: is
+Match  : None
+Search : <_sre.SRE_Match object; span=(2, 4), match='is'>
+```
 `fullmatch()` 函数要求全部字符都匹配。
 
 ``` python
@@ -701,16 +703,15 @@ s = re.fullmatch(pattern, text)
 print('Full match :', s)
 ```
 
-这里，`search()` 显示要匹配的字符确实出现在输入中，但是没有包含整个需匹配的字符，
-因此，`fullmatch()` 返回了`None`。
+这里，`search()`结果显示要匹配的字符确实出现在了输入中，但是没有包含整个需匹配的字符，因此，`fullmatch()` 返回了`None`。
+```
+$ python3 re_fullmatch.py
 
-    $ python3 re_fullmatch.py
-
-    Text       : This is some text -- with punctuation.
-    Pattern    : is
-    Search     : <_sre.SRE_Match object; span=(2, 4), match='is'>
-    Full match : None
-
+Text       : This is some text -- with punctuation.
+Pattern    : is
+Search     : <_sre.SRE_Match object; span=(2, 4), match='is'>
+Full match : None
+```
 编译的正则表达式的`search()` 方法接受可选的起始和结束参数，以限制搜索匹配的范围。
 
 ``` python
@@ -738,18 +739,17 @@ while True:
 ```
 
 上述例子实现了一个低效率的`iterall()` 方法。每次匹配成功后，该匹配的结束为止用于下一次匹配的起始位置。
+```
+$ python3 re_search_substring.py
 
-    $ python3 re_search_substring.py
+Text: This is some text -- with punctuation.
 
-    Text: This is some text -- with punctuation.
-
-       0 :  3 = "This"
-       5 :  6 = "is"
-
+   0 :  3 = "This"
+   5 :  6 = "is"
+```
 ## 分组(Dissecting Matches with Groups)
 
-模式匹配是正则表达式提供的强大基础功能。模式分组将匹配分离扩展了这种能力。
-组通过在括号中包围模式来定义。
+模式匹配是正则表达式提供的强大基础功能。模式分组将匹配分离扩展了这种能力。组通过以括号包围的匹配模式来定义。
 
 ``` python
 # re_groups.py
@@ -767,40 +767,40 @@ test_patterns(
 
 任何完整的正则表达式都可以转换为分组模式。
 所有重复修饰符都可以应用于整个组，这时需要整个组模式重复。
+```
+$ python3 re_groups.py
 
-    $ python3 re_groups.py
+'a(ab)' (a followed by literal ab)
 
-    'a(ab)' (a followed by literal ab)
+  'abbaaabbbbaaaaa'
+  ....'aab'
 
-      'abbaaabbbbaaaaa'
-      ....'aab'
+'a(a*b*)' (a followed by 0-n a and 0-n b)
 
-    'a(a*b*)' (a followed by 0-n a and 0-n b)
+  'abbaaabbbbaaaaa'
+  'abb'
+  ...'aaabbbb'
+  ..........'aaaaa'
 
-      'abbaaabbbbaaaaa'
-      'abb'
-      ...'aaabbbb'
-      ..........'aaaaa'
+'a(ab)*' (a followed by 0-n ab)
 
-    'a(ab)*' (a followed by 0-n ab)
+  'abbaaabbbbaaaaa'
+  'a'
+  ...'a'
+  ....'aab'
+  ..........'a'
+  ...........'a'
+  ............'a'
+  .............'a'
+  ..............'a'
 
-      'abbaaabbbbaaaaa'
-      'a'
-      ...'a'
-      ....'aab'
-      ..........'a'
-      ...........'a'
-      ............'a'
-      .............'a'
-      ..............'a'
+'a(ab)+' (a followed by 1-n ab)
 
-    'a(ab)+' (a followed by 1-n ab)
+  'abbaaabbbbaaaaa'
+  ....'aab'
+```
 
-      'abbaaabbbbaaaaa'
-      ....'aab'
-
-
-要访问由模式中的各个组匹配的子串，需使用`Match`对象的`groups()`方法。
+要访问由模式中的各个组成功匹配的子串，需使用`Match`对象的`groups()`方法。
 
 ``` python
 # re_groups_match.py
@@ -828,27 +828,27 @@ for pattern, desc in patterns:
 ```
 
 `Match.groups()`按照与该字符串匹配的表达式中的组的顺序返回一串字符串。
+```
+$ python3 re_groups_match.py
 
-    $ python3 re_groups_match.py
+This is some text -- with punctuation.
 
-    This is some text -- with punctuation.
+'^(\w+)' (word at start of string)
 
-    '^(\w+)' (word at start of string)
+   ('This',)
 
-       ('This',)
+'(\w+)\S*$' (word at end, with optional punctuation)
 
-    '(\w+)\S*$' (word at end, with optional punctuation)
+   ('punctuation',)
 
-       ('punctuation',)
+'(\bt\w+)\W+(\w+)' (word starting with t, another word)
 
-    '(\bt\w+)\W+(\w+)' (word starting with t, another word)
+   ('text', 'with')
 
-       ('text', 'with')
+'(\w+t)\b' (word ending with t)
 
-    '(\w+t)\b' (word ending with t)
-
-       ('text',)
-
+   ('text',)
+```
 要求单个组的匹配，请使用 `group()`方法。 当分组用于匹配字符串的一部分时而不需要另一部分时，这很有用。
 
 ``` python
@@ -872,19 +872,18 @@ print('Word after "t" word   :', match.group(2))
 ```
 
 分组0表示整个表达式匹配的字符串，子组按照它们的左括号出现在表达式中的顺序从1开始编号。
+```
+$ python3 re_groups_individual.py
 
-    $ python3 re_groups_individual.py
-
-    Input text            : This is some text -- with punctuation.
-    Pattern               : (\bt\w+)\W+(\w+)
-    Entire match          : text -- with
-    Word starting with "t": text
-    Word after "t" word   : with
-
+Input text            : This is some text -- with punctuation.
+Pattern               : (\bt\w+)\W+(\w+)
+Entire match          : text -- with
+Word starting with "t": text
+Word after "t" word   : with
+```
 
 Python 将基础的分组扩展为分组命名模式。
-使用名称引用分组可以更容易地随时修改匹配模式，而无需使用匹配结果修改代码。
-利用语法`(?P<name>pattern)`来设置分组的名称。
+使用名称引用分组可以更容易地随时修改匹配模式，而无需使用匹配结果修改代码。利用`(?P<name>pattern)`来设置分组的名称。
 
 ``` python
 # re_groups_named.py
@@ -915,27 +914,27 @@ for pattern in patterns:
 
 使用`groupdict()`从匹配中检索字典以映射组名到匹配得到的子字符串。
 匹配结果也包含在由`groups()`返回的有序序列中。
+```
+$ python3 re_groups_named.py
 
-    $ python3 re_groups_named.py
+This is some text -- with punctuation.
 
-    This is some text -- with punctuation.
+'^(?P<first_word>\w+)'
+   ('This',)
+   {'first_word': 'This'}
 
-    '^(?P<first_word>\w+)'
-       ('This',)
-       {'first_word': 'This'}
+'(?P<last_word>\w+)\S*$'
+   ('punctuation',)
+   {'last_word': 'punctuation'}
 
-    '(?P<last_word>\w+)\S*$'
-       ('punctuation',)
-       {'last_word': 'punctuation'}
+'(?P<t_word>\bt\w+)\W+(?P<other_word>\w+)'
+   ('text', 'with')
+   {'t_word': 'text', 'other_word': 'with'}
 
-    '(?P<t_word>\bt\w+)\W+(?P<other_word>\w+)'
-       ('text', 'with')
-       {'t_word': 'text', 'other_word': 'with'}
-
-    '(?P<ends_with_t>\w+t)\b'
-       ('text',)
-       {'ends_with_t': 'text'}
-
+'(?P<ends_with_t>\w+t)\b'
+   ('text',)
+   {'ends_with_t': 'text'}
+```
 `test_patterns()` 函数的升级版本将会使接下来的例子更为明晰。
 这个版本中，我们将显示分组编号和命名的分组。
 
@@ -974,14 +973,68 @@ def test_patterns(text, patterns):
                 )
         print()
     return
-
 ```
 
 由于组本身是一个完整的正则表达式，组也可以嵌套在其他组中以构建更复杂的表达式。
 
 ``` python
+# re_groups_nested.py
+from re_test_patterns_groups import test_patterns
+
+test_patterns(
+    'abbaabbba',
+    [(r'a((a*)(b*))', 'a followed by 0-n a and 0-n b')],
+)
+```
+
+该示例中，最后一次匹配`(a*)`没有匹配到任何字符，因此，`group()` 的返回值中均为空字符。
 
 ```
+$ python3 re_groups_nested.py
+
+'a((a*)(b*))' (a followed by 0-n a and 0-n b)
+
+  'abbaabbba'
+  'abb'        ('bb', '', 'bb')
+     'aabbb'   ('abbb', 'a', 'bbb')
+          'a'  ('', '', '')
+```
+
+分组在指定可选模式时也很有用。利用`|`符号来将匹配模式分开。
+
+```Python
+# re_groups_alternative.py
+
+from re_test_patterns_groups import test_patterns
+
+test_patterns(
+    'abbaabbba',
+    [(r'a((a+)|(b+))', 'a then seq. of a or seq. of b'),
+     (r'a((a|b)+)', 'a then seq. of [ab]')],
+)
+```
+
+第一个表达式匹配字母 a 后全为 a 或全为 b 的序列；
+
+第二个表达式匹配字母 a 后为 a 或 b 的序列。
+
+当子分组没有成功匹配而大分组成功匹配时，返回值会包含 None。
+
+```
+$ python3 re_groups_alternative.py
+
+'a((a+)|(b+))' (a then seq. of a or seq. of b)
+
+  'abbaabbba'
+  'abb'        ('bb', None, 'bb')
+     'aa'      ('a', 'a', None)
+
+'a((a|b)+)' (a then seq. of [ab])
+
+  'abbaabbba'
+  'abbaabbba'  ('bbaabbba', 'a')
+```
+
 
 
 ## 搜索选项
@@ -994,4 +1047,3 @@ def test_patterns(text, patterns):
 ### 多行输入
 
 ### Unicode
-

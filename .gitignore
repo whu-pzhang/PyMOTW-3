@@ -1,3 +1,4 @@
 _book/
 __pycache__/
+.DS_Store
 
